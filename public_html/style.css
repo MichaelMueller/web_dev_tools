@@ -4,7 +4,7 @@
     --h1: 18px;
     --std_font_size: 12px;
     --small_font_size: 8px;
-    --large_margin: 12px;
+    --large_margin: 22px;
     --std_margin: 14px;
     --small_margin: 6px;
     --font_family: Arial, sans-serif;
@@ -84,6 +84,14 @@ td
 {
     height: auto;
     width: 100%;
+}
+.std_padding
+{
+    padding: var(--std_margin);
+}
+.large_padding
+{
+    padding: var(--large_margin);
 }
 .print
 {

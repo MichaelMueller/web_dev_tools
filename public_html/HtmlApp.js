@@ -7,7 +7,7 @@
  * @param {boolean} debug
  * @returns {void}
  */
-function create_html_app( initializer_function, db_js_url="Db.js" )
+function create_html_app( initializer_function, db_js_url="Db.js", ...dependencies )
 {
     
     if( !( initializer_function instanceof Function ) )
@@ -15,7 +15,7 @@ function create_html_app( initializer_function, db_js_url="Db.js" )
         console.error(`"initializer_function": Expected function, not ${typeof initializer_function}`);
         return;
     }
-    let dependencies = [db_js_url];    
+    dependencies.push( db_js_url );    
 
     for( const dependency of dependencies )
     {
@@ -37,8 +37,8 @@ function create_html_app( initializer_function, db_js_url="Db.js" )
          * - data-action: ('save_in_browser'|'load_from_browser'|'remove_from_browser') in combination with data-local-storage-key
          * - data-html
          * - data-value on input, textarea, select
-         * - data-display, possibly added by data-match and data-display-type
-         * - data-visibility, possibly added by data-match
+         * - data-display, possibly added by data-match or data-match-not and data-display-type
+         * - data-visibility, possibly added by data-match or data-match-not
          * - data-path, possibly added by data-sub-dir-template-id
         */
         class HtmlApp extends Db
@@ -281,7 +281,11 @@ function create_html_app( initializer_function, db_js_url="Db.js" )
                 elements = document.querySelectorAll('*[data-display="'+path+'"]');
                 for(let i=0; i < elements.length; ++i)
                 {
-                    let matches = "match" in elements[i].dataset ? value == elements[i].dataset.match : Boolean( value );
+                    let matches = Boolean( value );
+                    if( "match" in elements[i].dataset )
+                        matches = value == elements[i].dataset.match;
+                    else if( "matchNot" in elements[i].dataset )
+                        matches = ! (value == elements[i].dataset.matchNot);
                     
                     if( matches == false )
                         elements[i].style.display = "none";
@@ -295,7 +299,12 @@ function create_html_app( initializer_function, db_js_url="Db.js" )
                 elements = document.querySelectorAll('*[data-visibility="'+path+'"]');
                 for(let i=0; i < elements.length; ++i)
                 {
-                    let matches = "match" in elements[i].dataset ? value == elements[i].dataset.match : Boolean( value );
+                    let matches = Boolean( value );
+                    if( "match" in elements[i].dataset )
+                        matches = value == elements[i].dataset.match;
+                    else if( "matchNot" in elements[i].dataset )
+                        matches = ! (value == elements[i].dataset.matchNot);
+                    
                     
                     if( matches == false )
                         elements[i].style.visibility = "hidden";
