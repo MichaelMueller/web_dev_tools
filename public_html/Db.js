@@ -51,23 +51,7 @@ class Db
          * @protected
          */
         this.listeners = [];
-    } 
-    /**
-     * 
-     * @param {Object} uuid_generator
-     * @returns {boolean} 
-     * @public
-    */
-    set_uuid_generator( uuid_generator )
-    {
-        if( !(uuid_generator instanceof Function) )
-        {
-            console.error(`"uuid_generator": expected be function, got ${uuid_generator}`);
-            return false;
-        }
-        this.uuid_generator = uuid_generator;
-        return true;
-    }
+    }     
     /**
      * 
      * @param {boolean} debug
@@ -172,6 +156,11 @@ class Db
     */
     vcd( names )
     {        
+        if( Array.isArray(names) == false )
+        {
+            this.error(`"names": expected array, got ${names}`);
+            return false;
+        }
         if( names.length == 0 )
         {
             this.cwd = this.data;
