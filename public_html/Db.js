@@ -392,7 +392,7 @@ class Db
             return undefined;
         }
         
-        if( this.is_dir(name) == false )
+        if( !name || this.is_dir(name) == false )
         {
             if( !name )
             {
@@ -431,7 +431,7 @@ class Db
         }      
 
         if( cd  == true )
-            this.cd( name );
+            return this.cd( name );
         
         return name;
     }
@@ -539,6 +539,7 @@ class Db
      */
     str_path( delimiter = ".", ...names )
     {
+        //console.log( this.current_path );
         names = this.current_path.concat(names);
         return names.join(delimiter);
     }

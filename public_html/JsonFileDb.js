@@ -125,8 +125,9 @@ class JsonFileDb extends Db
      */
     removed( db, name, prev_value ) 
     {
+        //console.log("removed"+name);
         let dir_path = this.file_path( name, null );
-        let file_path = this.file_path( name, null );
+        let file_path = this.file_path( name );
         try 
         {
             if( fs.existsSync(file_path) )
