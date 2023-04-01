@@ -1,3 +1,4 @@
+
 /**
  * A file system like database
  */
@@ -7,13 +8,19 @@ class Db
      * @param {function} uuid_generator
      * @param {boolean} debug whether to print debug messages
      */
-    constructor(uuid_generator)
-    {   
+    constructor()
+    {           
+        /**
+         * crypto moduke
+         * @type {object}
+         * @protected
+         */
+        this.crypto = typeof window === 'undefined' ? require('crypto') : crypto;
         /**
          * @type {function}
          * @protected
          */
-        this.uuid_generator = uuid_generator;
+        this.uuid_generator = function() { return this.crypto.randomUUID(); };
         /**
          * @type {boolean}
          * @protected
@@ -44,11 +51,22 @@ class Db
          * @protected
          */
         this.listeners = [];
-        /**
-         * @type {Object}
-         * @protected
-         */
-        this.lazy_loader;
+    } 
+    /**
+     * 
+     * @param {Object} uuid_generator
+     * @returns {boolean} 
+     * @public
+    */
+    set_uuid_generator( uuid_generator )
+    {
+        if( !(uuid_generator instanceof Function) )
+        {
+            console.error(`"uuid_generator": expected be function, got ${uuid_generator}`);
+            return false;
+        }
+        this.uuid_generator = uuid_generator;
+        return true;
     }
     /**
      * 
@@ -69,33 +87,6 @@ class Db
             console.error(`"debug" must be boolean, not ${debug}`);
             return false;
         }
-    }    
-    /**
-     * 
-     * @param {Object} lazy_loader
-     * @returns {boolean} 
-     * @public
-    */
-    set_lazy_loader( lazy_loader )
-    {
-        if( typeof lazy_loader != "object" )      
-        {
-            console.error(`"lazy_loader": must be object, not ${lazy_loader}`);
-            return false;
-        }      
-        let has_required_functions = false;
-        let required_functions = ["get", "names"];
-        for( const required_function of required_functions )
-            has_required_functions = has_required_functions || required_function in lazy_loader && lazy_loader[required_function] instanceof Function;
-
-        if( !has_required_functions )      
-        {
-            console.error(`"lazy_loader": must contain at least one of these functions: ${required_functions}`);
-            return false;
-        }      
-        
-        this.dbg(`setting lazy_loader`);
-        this.lazy_loader = lazy_loader;
     }    
     /**
      * 
@@ -199,7 +190,7 @@ class Db
                 }   
                 else    
                 {
-                    console.error(`Invalid path ${names}`);
+                    this.error(`Invalid path ${names}`);
                     return false; 
                 }            
             }
@@ -218,9 +209,9 @@ class Db
     {
         let last_name;
         if( typeof path != "string" || path.length == 0 )
-            console.error(`Invalid path ${path}`);
+            this.error(`Invalid path ${path}`);
         if( typeof delimiter != "string" || delimiter.length == 0 )
-            console.error(`Invalid delimiter ${delimiter}`)
+            this.error(`Invalid delimiter ${delimiter}`)
         
         let names = path.split( delimiter );
         last_name = pop_last_name ? names.pop() : names[names.length - 1];
@@ -290,7 +281,7 @@ class Db
         // plain objects are managed by the db and cannot be set
         if( this.is_plain_object(value) )
         {
-            console.error(`Invalid value "${value}" for "${name}", must not be a plain object`);
+            this.error(`Invalid value "${value}" for "${name}", must not be a plain object`);
             return false;
         }
         
@@ -381,7 +372,7 @@ class Db
         let names = this.get( name );
         if( !Array.isArray(names) )
         {
-            console.error(`Expected array at ${name} to be treated as link, but found ${names}`);
+            this.error(`Expected array at ${name} to be treated as link, but found ${names}`);
             return false;
         }
         return this.cd() && this.vcd( names );
@@ -397,14 +388,21 @@ class Db
     {
         if( !( name == null || name == undefined || ( typeof name == "string" && name.length > 0 ) ) )
         {
-            console.error(`Invalid name ${name}`);
+            this.error(`Invalid name ${name}`);
             return undefined;
         }
         
         if( this.is_dir(name) == false )
         {
             if( !name )
+            {
                 name =this.uuid_generator();
+                if( !(typeof name == "string" && name.length > 0 ) )
+                {
+                    this.error(`Invalid uuid ${name}. Please check uuid generator implementation`);
+                    return false;
+                }
+            }
           
             for( let validator of this.validators )
                 if( "dir_can_be_created" in validator )
@@ -453,10 +451,14 @@ class Db
                         return false;        
 
             let prev_value = this.internal_get( name, false );
-            this.dbg(`removing "${name}" with value "${prev_value}" in "${this.path()}"`);
+
+            /*
             if( this.is_plain_object(prev_value) == false )
                 if( this.set( name, undefined ) == false )
                     return false;
+                    */
+
+            this.dbg(`removing "${name}" with value "${prev_value}" in "${this.path()}"`);
             delete this.cwd[name];
 
             // inform listeners
@@ -488,15 +490,13 @@ class Db
      */
     get( name )
     {
-        let value = this.internal_get( name );
-        if( value  )
+        let value = this.internal_get( name,  true );
+        if( this.is_plain_object(value) == true )    
         {
-            if( this.is_plain_object(value) )    
-            {
-                console.error(`"${name}" is a directory and cannot be directly accessed`);
-                value = undefined;
-            }       
-        }
+            this.error(`"${name}" is a directory and cannot be directly accessed`);
+            value = undefined;
+        }       
+        
         return value;
     }
     /**
@@ -507,6 +507,19 @@ class Db
     names()
     {
         return this.internal_names();
+    }
+    /**
+     * 
+     * @returns {boolean}
+     * @public
+     */
+    path_matches( ...names )
+    {
+        let path_matches = names.length == this.current_path.length;
+        if( path_matches )
+            for( let i=0; i < names.length && path_matches; ++i )
+                path_matches = path_matches && ( names[i] == "*" || names[i] == this.current_path[i] );
+        return path_matches;
     }
     /**
      * 
@@ -537,7 +550,7 @@ class Db
      */
     to_json( indent=null )
     {
-        let json = JSON.stringify( this.data, null, indent );        
+        let json = JSON.stringify( this.cwd, null, indent );        
         return json;
     } 
     /**
@@ -576,12 +589,12 @@ class Db
                 else
                     ok = ok && this.set( key, value );
             }
-
+            return ok;
         }.bind( this );
 
-        ok = ok && this.cd();
+        // ok = ok && this.cd();
         if( ok )
-            recursive_set(object);
+            ok = recursive_set(object);
 
         return ok;
     }
@@ -603,7 +616,9 @@ class Db
      */
     is_plain_object( object ) 
     { 
-        return typeof object == "object" && object.constructor === Object; 
+        let v = object;
+        return (!!v && typeof v === 'object' && (v.__proto__ === null || v.__proto__ === Object.prototype));
+        //return typeof object == "object" && object.constructor === Object; 
     }
     /**
      * 
@@ -617,13 +632,21 @@ class Db
     }
     /**
      * 
+     * @param {string} msg
+     * @public
+     */
+    error( msg )
+    {
+        console.error(`[${this.constructor.name}][ERROR][${Date.now()}]: ${new Error(msg).stack}`);
+    }
+    /**
+     * 
      * @returns {string[]}
      * @protected
      */
     internal_names()
     {
-        let names = this.lazy_loader ? this.lazy_loader.names( this ) : Object.keys( this.cwd );
-        return names;        
+        return Object.keys( this.cwd );
     }
     /**
      * 
@@ -633,17 +656,18 @@ class Db
      */
     internal_get( name, issue_error=true )
     {
-        let value = this.lazy_loader ? this.lazy_loader.get( this, name ) : ( name in this.cwd ? this.cwd[name] : undefined );
+        let value = name in this.cwd ? this.cwd[name] : undefined;
         if( value === undefined && issue_error )
             console.error(`${name} not found in path ${path}`);
         return value;
     }
     /**
      * 
+     * @param {Db} db
      * @returns {boolean}
      * @protected
      */
-    static test()
+    static test( db=null )
     {
         let tassert = function(condition, msg, stop=true) { 
             msg = `Checking "${msg}": ${condition ? "PASSED" : "FAILED" }`;
@@ -664,8 +688,11 @@ class Db
         try 
         {
             console.log(`[${Db.name}][TEST] STARTING TESTS!`);
-            let db = new Db( uuid_generator );
-            db.set_debug( true );
+            if( !db )
+            {
+                db = new Db( uuid_generator );
+                db.set_debug( true );
+            }
 
             tassert( db.mkdir("users") == "users", `db.mkdir("users")  == true` );
             
@@ -675,6 +702,7 @@ class Db
             tassert( db.path().join(".") == "users", `db.path().join(".") == "users"` );
             tassert( db.cd("not_existent") == false, `db.cd("not_existent") == false` );
             tassert( db.cd(generated_name) == true, `db.cd(generated_name) == true` );
+            tassert( db.path_matches("users", "*") == true, `db.path_matches("users", "*") == true` );
             
             tassert( db.set( "name", {} ) == false, `db.set( "name", {} ) == true`);
             tassert( db.set( "name", "Michael" ) == true, `db.set( "name", "Michael" ) == true`);
@@ -687,6 +715,7 @@ class Db
             tassert( new_generated_name != generated_name, `new_generated_name != generated_name` );
             tassert( db.set( "name", "Stefan" ) == true, `db.set( "name", "Kristina" ) == true`);
             tassert( db.set( "age", 29 ) == true, `db.set( "age", 39 ) == true`);
+            tassert( db.cd() == true, `db.cd() == true`);
 
             let json = db.to_json();
             db.cd();
@@ -718,4 +747,10 @@ class Db
             return false;
         }
     }
+}
+
+// export for Node
+if(typeof window === 'undefined' )
+{
+    module.exports = Db;
 }

@@ -44,15 +44,11 @@ function create_html_app( initializer_function, db_js_url="Db.js", ...dependenci
         class HtmlApp extends Db
         {
             /**
-             * 
-             * @param {string} delimiter
-             * @param {boolean} debug
+             * Init all fields
              */
             constructor()                
             {
-                //super( function() { return crypto.randomUUID(); } );
-                var id = 0;
-                super( function() { ++id; return String(id); } );
+                super();
                 /**
                  * @type {string}
                  * @protected
@@ -193,6 +189,7 @@ function create_html_app( initializer_function, db_js_url="Db.js", ...dependenci
                     else if( "value" in event.target.dataset )
                     {
                         let last_name = this.cd_by_path( event.target.dataset.value, true, this.delimiter );
+                        
                         if( last_name )
                         {                        
                             this.changed_element = event.target;
@@ -250,6 +247,9 @@ function create_html_app( initializer_function, db_js_url="Db.js", ...dependenci
                     }
 
                     let type = elements[i].getAttribute("type") ? elements[i].getAttribute("type").toLowerCase() : null;
+                    if( type == "file" ) // file inputs cannot be set
+                        continue;
+
                     if( type == "radio" || type == "checkbox" )
                     {
                         if( elements[i].value == value )
@@ -359,11 +359,16 @@ function create_html_app( initializer_function, db_js_url="Db.js", ...dependenci
             {
                 let path = this.str_path( this.delimiter, name );
                 this.dbg(`removed: ${path}`);                
-                let elements = document.querySelectorAll('*[data-path="'+path+'"]');
-                for(let i=0; i < elements.length; ++i)
+                if( typeof prev_value == "object" )
                 {
-                    elements[i].remove();
+                    let elements = document.querySelectorAll('*[data-path="'+path+'"]');
+                    for(let i=0; i < elements.length; ++i)
+                    {
+                        elements[i].remove();
+                    }
                 }
+                else
+                    this.value_changed( html_app, name, prev_value, undefined );
             }
         }
 
