@@ -1,0 +1,335 @@
+:root 
+{
+    --xxlarge_font: 24px;
+    --xlarge_font: 18px;
+    --large_font: 15px;
+    --medium_font: 12px;
+    --small_font: 10px;
+
+    --xxlarge_space: 24px;
+    --xlarge_space: 18px;
+    --large_space: 15px;
+    --medium_space: 12px;
+    --small_space: 8px;
+
+    --title: 24px;
+    --h1: 18px;
+    --h2: 16px;
+    --std_font_size: 12px;
+    --small_font_size: 8px;
+
+    --large_margin: 22px;
+    --std_margin: 14px;
+    --small_space: 6px;
+
+    --font_family: Arial, sans-serif;
+    --std_border: solid 1px rgb(190,190,190);
+    --border_color: rgb(190,190,190);
+}
+
+/* Tag styles */
+*, a
+{
+    box-sizing: border-box;
+    padding: 0px;
+    margin: 0px;
+}
+
+h1
+{
+    font-size: var(--xxlarge_font);
+    font-weight: bold;
+}
+
+h2
+{
+    font-size: var(--xlarge_font);
+    font-weight: bold;
+}
+
+h3
+{
+    font-size: var(--large_font);
+    font-weight: bold;
+}
+
+body
+{
+    font-family: var(--font_family);
+    font-size: var(--medium_font);
+}
+
+
+input, textarea, select, option
+{
+    font-family: var(--font_family);
+    font-size: var(--medium_font);
+    padding: var(--medium_space);
+    border-radius: var(--small_space);
+}
+
+
+hr
+{
+    border: var(--std_border);
+}
+
+
+table
+{
+    border: var(--std_border);
+}
+
+
+th
+{
+    padding: var(--small_space);
+    text-align: left;
+}
+
+
+td
+{
+    padding: var(--small_space);
+}
+
+img
+{
+    width: 100%;
+    height: auto;
+}
+
+/* Classes */
+.small
+{
+    font-size: var(--small_font);
+}
+
+.b
+{
+    font-weight: bold;
+}
+
+.card 
+{
+    /* Add shadows to create the "card" effect */
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    border-radius: var(--small_space);
+    display: inline-block;
+}
+
+.column
+{
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+}
+
+.card > *
+{    
+    margin: var(--small_space);
+}
+
+.column > *
+{
+    flex-basis: 100%;
+}
+
+.card_fit_top > :first-child
+{    
+    margin: 0;
+    border-top-left-radius: var(--small_space);
+    border-top-right-radius: var(--small_space);
+}  
+
+/* On mouse-over, add a deeper shadow */
+.card:hover 
+{
+    box-shadow: 0 var(--small_space) var(--xlarge_space) 0 rgba(0,0,0,0.2);
+}
+
+.two_items_on_tablet
+{
+}
+
+
+.three_items_on_desktop
+{
+}
+
+
+.four_items_on_full_hd
+{
+}
+
+.gap
+{
+}
+
+.logo 
+{
+    height: 64px;
+    width: auto;
+}
+
+.image_preview 
+{
+    height: auto;
+    width: 100%;
+}
+
+
+.medium_padding
+{
+    padding: var(--medium_space);
+}
+
+
+.large_padding
+{
+    padding: var(--large_space);
+}
+
+
+.print
+{
+    display: none;
+}
+
+.no_print
+{
+    display: block;
+}
+
+.no_display
+{
+    display: none;
+}
+
+.hide
+{
+    visibility: hidden;
+}
+
+.layout_center
+{
+    justify-content: center;
+}
+
+
+.layout_stretch
+{
+    justify-content: stretch;
+}
+
+
+.layout_space
+{
+    justify-content: space-between;
+}
+
+
+.layout_cross_center
+{
+    align-items: center;
+}
+
+.text_center
+{
+    text-align: center;
+}
+
+a.button
+{
+    padding: var(--std_margin);
+    background-color: rgb(77, 77, 77);
+    color: white;
+    font-weight: bold;
+    border-radius: var(--small_space);
+    text-decoration: none;
+    display: inline-block;
+}
+
+
+a.button:hover
+{
+    background-color: rgb(49, 110, 163);
+}
+
+/* Media Queries */
+@media screen and (max-width:767px) 
+{
+}
+
+@media screen and (min-width:768px) 
+{
+    .two_items_on_tablet > *
+    {
+        flex-basis: calc( 50% - ( var(--std_margin) / 2.0 ) );
+    }
+
+    .gap > :nth-child(n+3)
+    {
+        margin-top: var(--std_margin);
+    }
+
+    .gap > :nth-child(even)
+    {
+        margin-left: var(--std_margin);
+    }
+}
+
+@media screen and (min-width:1366px) 
+{
+    .three_items_on_desktop > *
+    {
+        flex-basis: calc( 33.33333333% - ( 2.0 * var(--std_margin) / 3.0 ) );
+    }
+
+    .gap > :nth-child(1n)
+    {
+        margin-top: 0;
+        margin-left: 0;
+    }
+
+    .gap > :nth-child(n+4)
+    {
+        margin-top: var(--std_margin);
+    }
+
+    .gap > :nth-child(n+2)
+    {
+        margin-left: var(--std_margin);
+    }
+
+    .gap > :nth-child(3n+1)
+    {
+        margin-left: 0;
+    }
+}
+
+@media screen and (min-width:1920px) 
+{
+    .four_items_on_full_hd > *
+    {
+        flex-basis: 25%;
+    }
+}
+
+
+@media print 
+{ 
+    body > form 
+    {
+        width: 100%;
+    } 
+    .no_print
+    {
+        display: none;
+    } 
+    .print
+    {
+        display: block;
+    }
+}

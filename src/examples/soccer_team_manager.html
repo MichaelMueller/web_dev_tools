@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Soccer Team Manager Example</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="../App.js"></script>
+
+    <script type="text/javascript">            
+        document.addEventListener("DOMContentLoaded", function()
+        {
+            var dom_app = new DOMApp();
+            dom_app.set( ["storage_key"], "Soccer Team Manager Example");
+            dom_app.get_action( "load_from_local_storage" ).exec();
+        });
+    </script>
+
+</head>
+
+    <body class="col col_margin large_padding">
+        
+        <h1>Soccer Team Manager</h1>
+
+        <div>
+            <a href="#" class="button" >Add Team</a>
+            <a href="#" class="button" data-action="save_to_local_storage" data-display-if="name" data-display="inline-block">Save</a>
+        </div>
+
+        <div data-table="teams" class="column two_items_on_tablet three_items_on_desktop gap">
+
+            <div class="card card_fit_top">
+                <img class="image_full_width" src="https://media.dfl.de/sites/2/2022/05/1.-FC-Kaiserslautern-169-1200x675.png">
+                <p>FCK</p>
+            </div>
+
+            <div class="card">
+                Werder Bremen
+            </div>
+
+            <div class="card">
+                Werder Bremen
+            </div>
+
+            <div class="card">
+                Werder Bremen
+            </div>
+
+            <div class="card">
+                Werder Bremen
+            </div>
+
+            <div class="card">
+                Werder Bremen
+            </div>
+
+            <div class="card">
+                Werder Bremen
+            </div>
+
+            <div class="card">
+                Werder Bremen
+            </div>
+
+            <div class="card">
+                Werder Bremen
+            </div>
+
+            <div class="card">
+                Werder Bremen
+            </div>
+
+            <div class="card">
+                Werder Bremen
+            </div>
+        </div>
+
+    </body>
+
+</html>

@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+      "target": "ES5",
+      "module": "commonjs"
+    },
+    "files": [
+        "DOMApp.js"
+    ],
+    "include": [
+      "./App.js"
+    ]
+  }

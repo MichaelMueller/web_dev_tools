@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Hello World Example</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="../App.js"></script>
+
+    <script type="text/javascript">            
+        document.addEventListener("DOMContentLoaded", function()
+        {
+            var dom_app = new DOMApp();
+            dom_app.set( ["storage_key"], "Hello World Example");
+        });
+    </script>
+
+</head>
+
+    <body class="col col_margin large_padding">
+        
+        <p>Please enter your name:</p>
+
+        <div>
+            <input type="text" data-value="name" />
+            <a href="#" class="button" data-action="save_to_html_document" data-display-if="name" data-display="inline-block">Save</a>
+            <a href="#" class="button" data-action="load_from_local_storage">Load</a>
+        </div>
+
+        <div data-display-if="name">
+            Hello World from <span data-html="name"></span>!
+        </div>
+
+        <div data-visible-if="name" data-visible-matches="Michael">
+            Hi <span data-html="name"></span>! This is the secret easter egg for you.
+        </div>
+
+    </body>
+
+</html>

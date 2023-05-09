@@ -1,5 +1,29 @@
-//import {Db} from './Db';
-const Db = require('./Db.js');
+try
+{
+    let assertion = function( condition, text )
+    {
+        console.log(`Checking: ${text}`);
+        if( !condition )
+            throw new Error( `Assertion Failed: ${text}` );
+    }
+    console.log("************************** STARTING Tests **************************");
+    const AppModule = require('./src/App.js');
+    let app = new AppModule.App();
+    app.set( ["test"], true);
+    assertion( app.get("test") == true, `app.get("test") == true` );
+    console.log("************************** Tests PASSED **************************");
+
+}
+catch(error)
+{
+    console.error("************************** Tests FAILED **************************");
+    console.error(error);
+}
+
+
+
+
+/*const Db = require('./Db.js');
 const JsonFileDb = require('./JsonFileDb.js');
 
 Db.test( new Db() );
@@ -47,3 +71,4 @@ validator.can_be_removed = function( db, name )
 json_file_db.rm( "age" );
 console.log( json_file_db.exists( "age" ) );
 console.log( json_file_db.get("age") );
+*/
