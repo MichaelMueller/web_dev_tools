@@ -4,76 +4,46 @@
     <meta charset="utf-8">
     <title>Soccer Team Manager Example</title>
     <link rel="stylesheet" href="../style.css">
-    <script src="../App.js"></script>
+    <script src="../App2.js"></script>
 
-    <script type="text/javascript">            
-        document.addEventListener("DOMContentLoaded", function()
+    <script type="text/javascript">   
+        var initialized_data_object;
+
+        function add_team()
         {
-            var dom_app = new DOMApp();
-            dom_app.set( ["storage_key"], "Soccer Team Manager Example");
-            dom_app.get_action( "load_from_local_storage" ).exec();
-        });
+            initialized_data_object.set_value( ["teams", crypto.randomUUID()], { "name": initialized_data_object.get_value("new_team_name") } );
+        }
+
+        var initialize_data_object = function( data_object )
+        {
+            initialized_data_object = data_object;
+        }
+
+        default_startup( initialize_data_object );     
     </script>
 
 </head>
 
-    <body class="col col_margin large_padding">
+    <body class="col col_gap large_padding">
         
         <h1>Soccer Team Manager</h1>
 
-        <div>
-            <a href="#" class="button" >Add Team</a>
-            <a href="#" class="button" data-action="save_to_local_storage" data-display-if="name" data-display="inline-block">Save</a>
+        <div class="col col_gap">
+            <p class="b">Create a new team:</p>
+            <input type="text" data-value="new_team_name" />
+            <a href="#" class="button" onclick="event.preventDefault(); add_team();">Add Team</a>
         </div>
 
-        <div data-table="teams" class="column two_items_on_tablet three_items_on_desktop gap">
+        <div data-children="teams" data-template-id="team-template" class="resp_row resp_row_gap two_items_on_tablet three_items_on_desktop four_items_on_full_hd">
 
-            <div class="card card_fit_top">
-                <img class="image_full_width" src="https://media.dfl.de/sites/2/2022/05/1.-FC-Kaiserslautern-169-1200x675.png">
-                <p>FCK</p>
-            </div>
-
-            <div class="card">
-                Werder Bremen
-            </div>
-
-            <div class="card">
-                Werder Bremen
-            </div>
-
-            <div class="card">
-                Werder Bremen
-            </div>
-
-            <div class="card">
-                Werder Bremen
-            </div>
-
-            <div class="card">
-                Werder Bremen
-            </div>
-
-            <div class="card">
-                Werder Bremen
-            </div>
-
-            <div class="card">
-                Werder Bremen
-            </div>
-
-            <div class="card">
-                Werder Bremen
-            </div>
-
-            <div class="card">
-                Werder Bremen
-            </div>
-
-            <div class="card">
-                Werder Bremen
-            </div>
         </div>
 
+        <div id="team-template">            
+            <div class="card">
+                <p data-html="teams.name"></p>
+            </div>
+        </div>
+        
     </body>
 
 </html>

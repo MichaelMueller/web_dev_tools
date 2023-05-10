@@ -6,32 +6,31 @@
     <link rel="stylesheet" href="../style.css">
     <script src="../App.js"></script>
 
-    <script type="text/javascript">            
-        document.addEventListener("DOMContentLoaded", function()
+    <script type="text/javascript">   
+        var initialize_data_object = function( data_object )
         {
-            var dom_app = new DOMApp();
-            dom_app.set( ["storage_key"], "Hello World Example");
-        });
+            data_object.set_value( ["hello_world_data", "name"], "Tina" );
+        }
+
+        default_startup( initialize_data_object );     
     </script>
 
 </head>
 
-    <body class="col col_margin large_padding">
+    <body class="col col_gap large_padding">
         
         <p>Please enter your name:</p>
 
         <div>
-            <input type="text" data-value="name" />
-            <a href="#" class="button" data-action="save_to_html_document" data-display-if="name" data-display="inline-block">Save</a>
-            <a href="#" class="button" data-action="load_from_local_storage">Load</a>
+            <input type="text" data-value="hello_world_data.name" />
         </div>
 
-        <div data-display-if="name">
-            Hello World from <span data-html="name"></span>!
+        <div data-display-if="hello_world_data.name">
+            Hello World from <span data-html="hello_world_data.name"></span>!
         </div>
 
-        <div data-visible-if="name" data-visible-matches="Michael">
-            Hi <span data-html="name"></span>! This is the secret easter egg for you.
+        <div data-visible-if="hello_world_data.name" data-visible-matches="Michael">
+            Hi <span data-html="hello_world_data.name"></span>! This is the secret easter egg for you.
         </div>
 
     </body>

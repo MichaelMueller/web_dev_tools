@@ -12,16 +12,6 @@
     --medium_space: 12px;
     --small_space: 8px;
 
-    --title: 24px;
-    --h1: 18px;
-    --h2: 16px;
-    --std_font_size: 12px;
-    --small_font_size: 8px;
-
-    --large_margin: 22px;
-    --std_margin: 14px;
-    --small_space: 6px;
-
     --font_family: Arial, sans-serif;
     --std_border: solid 1px rgb(190,190,190);
     --border_color: rgb(190,190,190);
@@ -64,7 +54,7 @@ input, textarea, select, option
 {
     font-family: var(--font_family);
     font-size: var(--medium_font);
-    padding: var(--medium_space);
+    padding: calc( var(--medium_space) - var(--small_space) / 4.0 );
     border-radius: var(--small_space);
 }
 
@@ -119,21 +109,48 @@ img
     display: inline-block;
 }
 
-.column
+.col
+{
+    display: flex;
+    flex-direction: column;
+}
+
+.col.col_gap > :nth-child(n+2)
+{
+    margin-top: var(--medium_space);
+}
+
+.row
+{
+    display: flex;
+    flex-direction: row;
+}
+
+.row.row_gap > :nth-child(n+2)
+{
+    margin-left: var(--medium_space);
+}
+
+.resp_row
 {
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;
 }
 
+.resp_row > *
+{
+    flex-basis: 100%;
+}
+
+.resp_row_gap > :nth-child(n+2)
+{
+    margin-top: var(--medium_space);
+}
+
 .card > *
 {    
     margin: var(--small_space);
-}
-
-.column > *
-{
-    flex-basis: 100%;
 }
 
 .card_fit_top > :first-child
@@ -160,10 +177,6 @@ img
 
 
 .four_items_on_full_hd
-{
-}
-
-.gap
 {
 }
 
@@ -242,7 +255,7 @@ img
 
 a.button
 {
-    padding: var(--std_margin);
+    padding: var(--medium_space);
     background-color: rgb(77, 77, 77);
     color: white;
     font-weight: bold;
@@ -266,17 +279,33 @@ a.button:hover
 {
     .two_items_on_tablet > *
     {
-        flex-basis: calc( 50% - ( var(--std_margin) / 2.0 ) );
+        flex-basis: 50%;
+    }
+    
+    .resp_row_gap > :nth-child(1n)
+    {
+        margin-top: 0;
+        margin-left: 0;
     }
 
-    .gap > :nth-child(n+3)
+    .two_items_on_tablet.resp_row_gap > *
     {
-        margin-top: var(--std_margin);
+        flex-basis: calc( 50% - ( var(--medium_space) / 2.0 ) );
     }
 
-    .gap > :nth-child(even)
+    .two_items_on_tablet.resp_row_gap > :nth-child(n+3)
     {
-        margin-left: var(--std_margin);
+        margin-top: var(--medium_space);
+    }
+
+    .two_items_on_tablet.resp_row_gap > :nth-child(n+2)
+    {
+        margin-left: var(--medium_space);
+    }
+
+    .two_items_on_tablet.resp_row_gap > :nth-child(2n+1)
+    {
+        margin-left: 0;
     }
 }
 
@@ -284,26 +313,31 @@ a.button:hover
 {
     .three_items_on_desktop > *
     {
-        flex-basis: calc( 33.33333333% - ( 2.0 * var(--std_margin) / 3.0 ) );
+        flex-basis: 33.33333333%;
     }
 
-    .gap > :nth-child(1n)
+    .two_items_on_tablet.resp_row_gap > :nth-child(1n)
     {
         margin-top: 0;
         margin-left: 0;
     }
 
-    .gap > :nth-child(n+4)
+    .three_items_on_desktop.resp_row_gap > *
     {
-        margin-top: var(--std_margin);
+        flex-basis: calc( 33.33333333% - ( 2.0 * var(--medium_space) / 3.0 ) );
     }
 
-    .gap > :nth-child(n+2)
+    .three_items_on_desktop.resp_row_gap > :nth-child(n+4)
     {
-        margin-left: var(--std_margin);
+        margin-top: var(--medium_space);
     }
 
-    .gap > :nth-child(3n+1)
+    .three_items_on_desktop.resp_row_gap > :nth-child(n+2)
+    {
+        margin-left: var(--medium_space);
+    }
+
+    .three_items_on_desktop.resp_row_gap > :nth-child(3n+1)
     {
         margin-left: 0;
     }
@@ -311,10 +345,38 @@ a.button:hover
 
 @media screen and (min-width:1920px) 
 {
+    
     .four_items_on_full_hd > *
     {
         flex-basis: 25%;
     }
+
+    .three_items_on_desktop.resp_row_gap > :nth-child(1n)
+    {
+        margin-top: 0;
+        margin-left: 0;
+    }
+
+    .four_items_on_full_hd.resp_row_gap > *
+    {
+        flex-basis: calc( 25% - ( 3.0 * var(--medium_space) / 4.0 ) );
+    }
+
+    .four_items_on_full_hd.resp_row_gap > :nth-child(n+5)
+    {
+        margin-top: var(--medium_space);
+    }
+
+    .four_items_on_full_hd.resp_row_gap > :nth-child(n+2)
+    {
+        margin-left: var(--medium_space);
+    }
+
+    .four_items_on_full_hd.resp_row_gap > :nth-child(4n+1)
+    {
+        margin-left: 0;
+    }
+
 }
 
 
