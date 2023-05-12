@@ -1,37 +1,90 @@
+/**
+ * @namespace App
+ */
 
 /**
- * 
- * @callback function
- * @returns {void}
- * 
- * 
  * @callback value_changed_function
  * @param {string[]} path
  * @param {*} value
  * @param {*} old_value
  * @returns {void}
- * 
- * 
+ */
+
+/**
+ * @callback id_function
+ * @returns {string}
+ */
+
+/**
  * @typedef {Object} ChangedListener
  * @property {value_changed_function} value_changed
- * @property {function} uninstall
- * 
- * 
- * @callback install_changed_listener_function
- * @param {ChangedListener} changed_listener
- * @returns {void}
- * 
- * 
- * @callback uninstall_changed_listener_function
- * @param {ChangedListener} changed_listener
- * @returns {void}
- * 
- * 
+ * @property {id_function} get_id
+ * @property {function():void} uninstall
+ */
+
+/**
  * @typedef {Object} ChangedListenerRegistry
- * @property {install_changed_listener_function} install_changed_listener
- * @property {uninstall_changed_listener_function} uninstall_changed_listener
+ * @property {function( ChangedListener ):void} install_changed_listener
+ * @property {function( ChangedListener ):void} uninstall_changed_listener
+ * @property {function( ChangedListener ):boolean} has
  * @property {value_changed_function} notify_changed_listeners
  */
+
+/**
+ * @typedef {Object} StartupFunctions
+ * @property {function( function() ):void} register
+ * @property {function():void} execute_all
+ */
+
+/**
+ * @typedef {Object} App
+ * @property {function():void} start
+ * @property {function():DataObject} get_data_object
+ * @property {function():ChangedListenerRegistry} get_changed_listener_registry
+ * @property {function():StartupFunctions} get_startup_functions
+ */
+
+/**
+ * @callback validator_function
+ * @param {string} name
+ * @param {*} value
+ * @param {*} old_value
+ * @returns {boolean}
+ */
+
+/**
+ * @typedef {Object} DataObject
+ * @property {function(string[]|string, *):str} create
+ * @property {function(string[]|string):void} remove
+ * @property {function(string[]|string):*} get_value
+ * @property {function(string[]|string, *):void} set_value
+ * @property {function(string[]|string):string[]|null} names
+ * @property {function( validator_function ):void} register_validator
+ */
+
+/**
+ * 
+ * @returns {StartupFunctions}
+ */
+function create_startup_functions()
+{   
+    /**
+     * @type {ChangedListener[]}
+     */
+    var items = [];
+    /**
+     * @type {StartupFunctions}
+     */
+    var startup_functions = {};
+    
+    startup_functions.register = function( function_ ) { items.push( function_ ); };
+    startup_functions.execute_all = function() 
+    {
+        for( const function_ of items )
+            function_();
+    };
+    return startup_functions;
+}
 
 /**
  * 
@@ -46,21 +99,34 @@ function create_changed_listener_registry()
     /**
      * @type {ChangedListenerRegistry}
      */
-    var changed_listener_registry = {
-        "install_changed_listener": function( changed_listener ) 
-        {
+    var changed_listener_registry = {};
+    changed_listener_registry.install_changed_listener = function( changed_listener ) 
+    {
+        if( changed_listener_registry.has( changed_listener ) )
+            console.error(`Already installed: ${changed_listener}`);
+        else
             items.push( changed_listener );
-        },
-        "uninstall_changed_listener": function( changed_listener ) 
-        {
-            items = items.splice( items.indexOf(changed_listener), 1 );
-        },
-        "notify_changed_listeners": function( path, value, old_value ) 
-        {
-            for( const changed_listener of items )
-                changed_listener.value_changed( path, value, old_value );
-        }
+    };
+    changed_listener_registry.uninstall_changed_listener = function( changed_listener ) 
+    {
+        items = items.splice( items.indexOf(changed_listener), 1 );
+    };
+    changed_listener_registry.notify_changed_listeners = function( path, value, old_value ) 
+    {
+        for( const changed_listener of items )
+            changed_listener.value_changed( path, value, old_value );
     }
+    changed_listener_registry.has = function( obj ) 
+    {
+        if( !( "get_id" in obj ) )
+            return false;
+        //console.log( obj.get_id() );
+
+        for( const installed_changed_listener of items )
+            if( installed_changed_listener.get_id() == obj.get_id() )
+                return true;
+        return false;        
+    };
     
     return changed_listener_registry;
 }
@@ -68,15 +134,17 @@ function create_changed_listener_registry()
 /**
  * @param {ChangedListenerRegistry} changed_listener_registry
  * @param {value_changed_function} value_changed
+ * @param {id_function} get_id
  * @returns {ChangedListener}
  */
-function create_and_install_changed_listener(changed_listener_registry, value_changed)
+function create_changed_listener(changed_listener_registry, value_changed, get_id)
 {    
     /**
      * @type {ChangedListener}
      */
     var changed_listener = {};
     changed_listener.value_changed = value_changed;
+    changed_listener.get_id = get_id;
     changed_listener.uninstall = function() { changed_listener_registry.uninstall_changed_listener( changed_listener ); };
     changed_listener.notify_changed_listeners = function( path, value, old_value )  
     {        
@@ -88,16 +156,31 @@ function create_and_install_changed_listener(changed_listener_registry, value_ch
 }
 
 /**
+ * @param {ChangedListenerRegistry} changed_listener_registry
+ * @param {value_changed_function} value_changed
+ * @param {id_function} get_id
+ * @returns {ChangedListener}
+ */
+function create_dom_updater(changed_listener_registry, value_changed, delimiter)
+{    
+    /**
+     * @type {id_function}
+     */
+    var get_id = function() { return `${delimiter}${value_changed.toString().replace(/\s+/g, '')}` }
+    return create_changed_listener( changed_listener_registry, value_changed, get_id );
+}
+
+/**
  * @param {string} delimiter
  * @param {ChangedListenerRegistry} changed_listener_registry
- * @returns {void}
+ * @returns {ChangedListener}
  */
-function create_and_install_element_html_updater( delimiter, changed_listener_registry )
+function create_element_html_updater( delimiter, changed_listener_registry )
 {
     /**
      * @type {value_changed_function}
      */
-    var element_html_updater = function( path, value, old_value ) 
+    var value_changed = function( path, value, old_value ) 
     {
         let html_value = value == null || value == undefined ? "" : String(value);  
         let str_path = path.join( delimiter );
@@ -105,20 +188,21 @@ function create_and_install_element_html_updater( delimiter, changed_listener_re
         for( let element of elements )
             element.innerHTML = html_value;
     }    
-    return create_and_install_changed_listener( changed_listener_registry, element_html_updater );
+    return create_dom_updater( changed_listener_registry, value_changed, delimiter );
 }
 
 /**
  * @param {string} delimiter
  * @param {ChangedListenerRegistry} changed_listener_registry
- * @returns {void}
+ * @param {StartupFunctions} startup_functions
+ * @returns {ChangedListener}
  */
-function create_and_install_element_display_updater( delimiter, changed_listener_registry )
+function create_element_display_updater( delimiter, changed_listener_registry, startup_functions )
 {
     /**
      * @type {value_changed_function}
      */
-    var element_display_updater = function( path, value, old_value ) 
+    var value_changed = function( path, value, old_value ) 
     {
         let str_path = path.join( delimiter );
         let html_value = value == null || value == undefined ? "" : String(value);  
@@ -137,23 +221,27 @@ function create_and_install_element_display_updater( delimiter, changed_listener
         }
     }    
                
-    for( let element of document.querySelectorAll(`*[data-display-if]`) )
-        element.style.display = "none"; 
+    startup_functions.register( function() 
+    {
+        for( let element of document.querySelectorAll(`*[data-display-if]`) )
+            element.style.display = "none"; 
+    } );    
 
-    return create_and_install_changed_listener( changed_listener_registry, element_display_updater );
+    return create_dom_updater( changed_listener_registry, value_changed, delimiter );
 }
 
 /**
  * @param {string} delimiter
  * @param {ChangedListenerRegistry} changed_listener_registry
- * @returns {void}
+ * @param {StartupFunctions} startup_functions
+ * @returns {ChangedListener}
  */
-function create_and_install_element_visibility_updater( delimiter, changed_listener_registry )
+function create_element_visibility_updater( delimiter, changed_listener_registry, startup_functions )
 {
     /**
      * @type {value_changed_function}
      */
-    var element_visibility_updater = function( path, value, old_value ) 
+    var value_changed = function( path, value, old_value ) 
     {
         let str_path = path.join( delimiter );
         let html_value = value == null || value == undefined ? "" : String(value);  
@@ -171,10 +259,13 @@ function create_and_install_element_visibility_updater( delimiter, changed_liste
         }
     }    
                
-    for( let element of document.querySelectorAll(`*[data-visible-if]`) )
-        element.style.visibility = "hidden";  
+    startup_functions.register( function() 
+    {
+        for( let element of document.querySelectorAll(`*[data-visible-if]`) )
+            element.style.visibility = "hidden";  
+    } );
 
-    return create_and_install_changed_listener( changed_listener_registry, element_visibility_updater );
+    return create_dom_updater( changed_listener_registry, value_changed, delimiter );
 }
 
 /**
@@ -190,55 +281,16 @@ function is_plain_object( object )
 /**
  * @param {string} delimiter
  * @param {ChangedListenerRegistry} changed_listener_registry
- * @returns {void}
+ * @param {StartupFunctions} startup_functions
+ * @returns {ChangedListener}
  */
-function create_and_install_element_creator( delimiter, changed_listener_registry )
+function create_element_children_manager( delimiter, changed_listener_registry, startup_functions )
 {
     /**
      * @type {value_changed_function}
      */
-    var element_creator = function( path, value, old_value ) 
-    {
-        if( is_plain_object(value) == false )
-            return;
-        let parent_path = path.slice(0, -1);
-        let parent_str_path = parent_path.join( delimiter ); 
-        let str_child_path = path.join( delimiter );  
-        
-        let elements = document.querySelectorAll(`[data-children="${parent_str_path}"][data-template-id]`);        
-        for( let element of elements )
-        {
-            let template_container = document.getElementById( element.dataset.templateId );
-            let template_html = template_container.innerHTML;                    
-            template_html = template_html.replaceAll( parent_str_path, str_child_path );
-
-            var template = document.createElement('template');
-            template.innerHTML = template_html.trim();
-            let new_element = template.content.firstElementChild;
-            new_element.dataset.exist = str_child_path;
-            new_element.style.display = "displayType" in new_element.dataset ? new_element.dataset.displayType : "block";
-            element.append( new_element );
-        }
-    }    
-
-    for( let element of document.querySelectorAll(`*[data-children][data-template-id]`) )
-        document.getElementById( element.dataset.templateId ).style.display = "none";  
-
-    return create_and_install_changed_listener( changed_listener_registry, element_creator );
-}
-
-/**
- * @param {string} delimiter
- * @param {ChangedListenerRegistry} changed_listener_registry
- * @returns {void}
- */
-function create_and_install_element_remover( delimiter, changed_listener_registry )
-{
-    /**
-     * @type {value_changed_function}
-     */
-    var element_remover = function( path, value, old_value ) 
-    {
+    var value_changed = function( path, value, old_value ) 
+    {        
         if( value == null )
         {
             let str_path = path.join( delimiter );        
@@ -249,25 +301,37 @@ function create_and_install_element_remover( delimiter, changed_listener_registr
                 element.remove();
             }
         }
-    }    
+        else if( is_plain_object(value) && Object.keys( value ) == 0 )
+        {
+            let parent_path = path.slice(0, -1);
+            let parent_str_path = parent_path.join( delimiter ); 
+            let str_child_path = path.join( delimiter );  
+            
+            let elements = document.querySelectorAll(`[data-children="${parent_str_path}"][data-template-id]`);        
+            for( let element of elements )
+            {
+                let template_container = document.getElementById( element.dataset.templateId );
+                let template_html = template_container.innerHTML;                    
+                template_html = template_html.replaceAll( parent_str_path, str_child_path );
+    
+                var template = document.createElement('template');
+                template.innerHTML = template_html.trim();
+                let new_element = template.content.firstElementChild;
+                new_element.dataset.exist = str_child_path;
+                new_element.style.display = "displayType" in new_element.dataset ? new_element.dataset.displayType : "block";
+                element.append( new_element );
+            }
+        }
+    };
 
-    return create_and_install_changed_listener( changed_listener_registry, element_remover );
+    startup_functions.register( function() 
+    {
+        for( let element of document.querySelectorAll(`*[data-children][data-template-id]`) )
+            document.getElementById( element.dataset.templateId ).style.display = "none";  
+    } );
+
+    return create_dom_updater( changed_listener_registry, value_changed, delimiter );
 }
-
-/**
- * @callback get_value_function
- * @param {string[]|string} path
- * @returns {*}
- * 
- * @callback set_value_function
- * @param {string[]|string} path
- * @param {*} value
- * @returns {void}
- *
- * @typedef {Object} DataObject
- * @property {get_value_function} get_value
- * @property {set_value_function} set_value
- */
 
 /**
  * @param {ChangedListenerRegistry} changed_listener_registry
@@ -279,8 +343,8 @@ function create_data_object( changed_listener_registry )
      * @type {DataObject}
      */
     var data_object = {};
-
-
+    /** @type {validator_function[]} */
+    var validators = [];
     var data = {};
     data_object.get_value = function( path ) 
     {
@@ -325,65 +389,92 @@ function create_data_object( changed_listener_registry )
                 data_object.set_value( [...path, ...[last_name, child_name]], child_value );
         }    
         else 
-        {
-            parent[last_name] = value;
+        {            
+            for( const validator of validators )             
+                if( validator( [ ...path, ...[last_name] ], value ) == false )
+                    return;
+
+            if( value == null && old_value != null )
+                delete parent[last_name];
+            else
+                parent[last_name] = value;
+
             changed_listener_registry.notify_changed_listeners ( [ ...path, ...[last_name] ], parent[last_name], old_value );   
         }
-    }    
+    }  
+    
+    data_object.create = function( path, value )
+    {
+        if( Array.isArray(path) == false )
+            path = [path];
+        let uuid = crypto.randomUUID();
+        path.push( uuid );
+        data_object.set_value( path, value );
+        return uuid;
+    };
+    
+    data_object.remove = function( path )
+    {
+        data_object.set_value( path, null );
+    };
+    
+    data_object.register_validator = function( validator )
+    {
+        validators.push(validator);
+    };
+
+    data_object.names = function( path )
+    {
+        let obj = data_object.get_value( path );
+        return is_plain_object(obj) ? Object.keys( obj ) : null;
+    }
 
     return data_object;
 }
 
 /**
- * @callback get_currently_changed_element_function
- * @returns {Element}
- * 
- * @param {DataObject} data_object
- * @returns {get_currently_changed_element_function}
- */
-function install_document_element_changed_listener( delimiter, data_object )
-{
-    var currently_changed_element = null;
-    // add changed listener for form controls
-    document.addEventListener( "change", function(event) 
-    { 
-        if( "value" in event.target.dataset )
-        {
-            try 
-            {
-                let path = event.target.dataset.value.split( delimiter );
-                currently_changed_element = event.target;              
-                data_object.set_value( path, event.target.value );
-            } 
-            catch (error)
-            {
-                currently_changed_element = null;
-                throw error;
-            }
-        }
-    } );
-
-    return function() { return currently_changed_element };
-}
-
-/**
  * @param {string} delimiter
  * @param {ChangedListenerRegistry} changed_listener_registry
- * @param {get_currently_changed_element_function} get_currently_changed_element
- * @returns {void}
+ * @param {StartupFunctions} startup_functions
+ * @param {DataObject} data_object
+ * @returns {ChangedListener}
  */
-function create_and_install_element_value_updater( delimiter, changed_listener_registry, get_currently_changed_element )
+function create_element_value_updater( delimiter, changed_listener_registry, startup_functions, data_object )
 {
+    var currently_changed_element = null;
+
+    // add changed listener for form controls
+    var startup_function = function() 
+    {
+        document.addEventListener( "change", function(event) 
+        { 
+            if( "value" in event.target.dataset )
+            {
+                try 
+                {
+                    let path = event.target.dataset.value.split( delimiter );
+                    currently_changed_element = event.target;              
+                    data_object.set_value( path, event.target.value );
+                } 
+                catch (error)
+                {
+                    currently_changed_element = null;
+                    throw error;
+                }
+            }
+        } );
+    }
+
     /**
      * @type {value_changed_function}
      */
-    var element_value_updater = function( path, value, old_value ) 
+    var value_changed = function( path, value, old_value ) 
     {
         let elements = document.querySelectorAll(`*[data-value="${path.join( delimiter )}"]`);     
         let html_value = value == null || value == undefined ? "" : String(value);           
         for( let element of elements )
         {
-            if( element == get_currently_changed_element() )
+            if( element == currently_changed_element )
                 continue;
 
             let type = element.getAttribute("type") ? element.getAttribute("type").toLowerCase() : null;
@@ -400,38 +491,72 @@ function create_and_install_element_value_updater( delimiter, changed_listener_r
             }
         }
     }    
-
-    return create_and_install_changed_listener( changed_listener_registry, element_value_updater );
+    
+    startup_functions.register( startup_function );
+    return create_dom_updater( changed_listener_registry, value_changed, delimiter );
 }
 
 /**
- * @callback initialize_data_object_function
- * @param {DataObject}
+ * @param {string} delimiter
+ * @param {StartupFunctions} startup_functions
+ * @param {DataObject} data_object
  * @returns {void}
  */
+function install_form_listener( delimiter, startup_functions, data_object )
+{
+    // add changed listener for form controls
+    var startup_function = function() 
+    {
+        document.addEventListener( "submit", function(event) 
+        { 
+            if( "createIn" in event.target.dataset )
+            {
+                event.preventDefault();
+                const data = new FormData(event.target);
+                const form_data_object = {};
+                data.forEach((value, key) => (form_data_object[key] = value));
+                //console.log(JSON.stringify(data_object));
+                path = event.target.dataset.createIn.split(".");
+
+                data_object.create( path, form_data_object );
+            }
+        } );
+    }
+    startup_functions.register( startup_function );
+}
 
 /**
- * @param {initialize_data_object_function|null} initialize_data_object
- * @returns {DataObject}
+ * @returns {App}
  */
-function default_startup(initialize_data_object=null)
+function create_default_app(delimiter=".")
 {
-    document.addEventListener("DOMContentLoaded", function() 
+    /** @type {App} */
+    let app = {};
+
+    var startup_functions = create_startup_functions();
+    app.get_startup_functions = function() { return startup_functions; };
+
+    var changed_listener_registry = create_changed_listener_registry();
+    app.get_changed_listener_registry = function() { return changed_listener_registry; };
+
+    var data_object = create_data_object( changed_listener_registry );
+    app.get_data_object = function() { return data_object; };
+
+    // create changed listener registry and default changed listeners
+    create_element_html_updater         ( delimiter, changed_listener_registry );
+    create_element_display_updater      ( delimiter, changed_listener_registry, startup_functions );
+    create_element_visibility_updater   ( delimiter, changed_listener_registry, startup_functions );
+    create_element_children_manager     ( delimiter, changed_listener_registry, startup_functions );
+    create_element_value_updater        ( delimiter, changed_listener_registry, startup_functions, data_object );
+    install_form_listener               ( delimiter, startup_functions, data_object );
+
+    app.start = function()
     {
-        var delimiter = ".";
-        var changed_listener_registry = create_changed_listener_registry();
-        var data_object = create_data_object( changed_listener_registry );
-        var get_currently_changed_element = install_document_element_changed_listener(delimiter, data_object);
+        document.addEventListener("DOMContentLoaded", function() 
+        {    
+            startup_functions.execute_all();
+        });
+    }
 
-        // create changed listener registry and default changed listeners
-        create_and_install_element_html_updater( delimiter, changed_listener_registry );
-        create_and_install_element_display_updater( delimiter, changed_listener_registry );
-        create_and_install_element_visibility_updater( delimiter, changed_listener_registry );
-        create_and_install_element_remover( delimiter, changed_listener_registry );
-        create_and_install_element_creator( delimiter, changed_listener_registry );
-        create_and_install_element_value_updater( delimiter, changed_listener_registry, get_currently_changed_element );
-
-        if( initialize_data_object )
-            initialize_data_object( data_object );
-    });
+    return app;
 }

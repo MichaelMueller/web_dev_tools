@@ -6,13 +6,13 @@
     <link rel="stylesheet" href="../style.css">
     <script src="../App.js"></script>
 
-    <script type="text/javascript">   
-        var initialize_data_object = function( data_object )
-        {
-            data_object.set_value( ["hello_world_data", "name"], "Tina" );
-        }
-
-        default_startup( initialize_data_object );     
+    <script> 
+        var app = create_default_app();
+        app.get_startup_functions().register(function()
+        {                        
+            app.get_data_object().set_value( ["hello_world_data", "name"], "Tina" );
+        });  
+        app.start();
     </script>
 
 </head>

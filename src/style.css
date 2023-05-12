@@ -58,7 +58,6 @@ input, textarea, select, option
     border-radius: var(--small_space);
 }
 
-
 hr
 {
     border: var(--std_border);
@@ -115,6 +114,11 @@ img
     flex-direction: column;
 }
 
+.card > *
+{    
+    margin: var(--small_space);
+}
+
 .card_fit_top > :first-child
 {    
     margin: 0;
@@ -161,9 +165,21 @@ img
     margin-top: var(--medium_space);
 }
 
-.card > *
-{    
-    margin: var(--small_space);
+.full_screen
+{
+    width: 100%;
+    min-height: 100vw;
+}
+
+.loader
+{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: 100vw;
+    background-color: rgba(0,0,0,0.85);
+    z-index: 1000;
 }
 
 .two_items_on_tablet
@@ -223,27 +239,32 @@ img
     visibility: hidden;
 }
 
-.layout_center
+.flex_center
 {
     justify-content: center;
 }
 
 
-.layout_stretch
+.flex_stretch
 {
     justify-content: stretch;
 }
 
 
-.layout_space
+.flex_space
 {
     justify-content: space-between;
 }
 
 
-.layout_cross_center
+.flex_cross_center
 {
     align-items: center;
+}
+
+.flex_cross_left
+{
+    align-items: start;
 }
 
 .text_center
@@ -251,7 +272,7 @@ img
     text-align: center;
 }
 
-a.button
+.button
 {
     padding: var(--medium_space);
     background-color: rgb(77, 77, 77);
@@ -260,10 +281,13 @@ a.button
     border-radius: var(--small_space);
     text-decoration: none;
     display: inline-block;
+    text-align: center;
+    cursor: pointer;
+    border: 0;
 }
 
 
-a.button:hover
+.button:hover
 {
     background-color: rgb(49, 110, 163);
 }

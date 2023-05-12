@@ -4,22 +4,27 @@
     <meta charset="utf-8">
     <title>Soccer Team Manager Example</title>
     <link rel="stylesheet" href="../style.css">
-    <script src="../App2.js"></script>
+    <script src="../App.js"></script>
 
     <script type="text/javascript">   
         var initialized_data_object;
 
-        function add_team()
+        var app = create_default_app();
+        app.get_data_object().register_validator( function( path, value ) 
         {
-            initialized_data_object.set_value( ["teams", crypto.randomUUID()], { "name": initialized_data_object.get_value("new_team_name") } );
-        }
+            if( path.length >= 3 && path[0] == "teams" && path[2] == "name" )
+            {
+                if( (typeof(value) == "string" && value.length > 0) )
+                    app.get_data_object().remove(["errors", "invalid_name"]);
+                else
+                {
+                    app.get_data_object().set_value( ["errors", "invalid_name"], true ); 
+                    app.get_data_object().remove( path.slice(0, -1) );
+                }             
+            }
+        });
+        app.start();
 
-        var initialize_data_object = function( data_object )
-        {
-            initialized_data_object = data_object;
-        }
-
-        default_startup( initialize_data_object );     
     </script>
 
 </head>
@@ -28,11 +33,12 @@
         
         <h1>Soccer Team Manager</h1>
 
-        <div class="col col_gap">
+        <form class="col col_gap flex_cross_left" data-create-in="teams">
             <p class="b">Create a new team:</p>
-            <input type="text" data-value="new_team_name" />
-            <a href="#" class="button" onclick="event.preventDefault(); add_team();">Add Team</a>
-        </div>
+            <input type="text" name="name" data-value="new_team_name" />
+            <p data-display-if="errors.invalid_name">Name must not be empty</p>
+            <input type="submit" class="button" value="Add Team" />
+        </form>
 
         <div data-children="teams" data-template-id="team-template" class="resp_row resp_row_gap two_items_on_tablet three_items_on_desktop four_items_on_full_hd">
 
