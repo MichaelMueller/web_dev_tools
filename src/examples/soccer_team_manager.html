@@ -33,9 +33,13 @@
         
         <h1>Soccer Team Manager</h1>
 
-        <form class="col col_gap flex_cross_left" data-create-in="teams">
+        <form class="col col_gap" data-create-in="teams" data-name="name">
             <p class="b">Create a new team:</p>
-            <input type="text" name="name" data-value="new_team_name" />
+            <input type="text" name="name" />
+            <div>
+                <span>Number of Championships:&nbsp;</span>
+                <input type="number" name="championships" />
+            </div>
             <p data-display-if="errors.invalid_name">Name must not be empty</p>
             <input type="submit" class="button" value="Add Team" />
         </form>
@@ -47,6 +51,7 @@
         <div id="team-template">            
             <div class="card">
                 <p data-html="teams.name"></p>
+                <p>Number of Championships: <span data-html="teams.championships"></span></p>
             </div>
         </div>
         

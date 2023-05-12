@@ -517,8 +517,13 @@ function install_form_listener( delimiter, startup_functions, data_object )
                 data.forEach((value, key) => (form_data_object[key] = value));
                 //console.log(JSON.stringify(data_object));
                 path = event.target.dataset.createIn.split(".");
-
-                data_object.create( path, form_data_object );
+                if( "name" in event.target.dataset )
+                {
+                    path.push( form_data_object[event.target.dataset.name] );
+                    data_object.set_value( path, form_data_object );
+                }
+                else
+                    data_object.create( path, form_data_object );
             }
         } );
     }
