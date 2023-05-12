@@ -461,56 +461,6 @@ function create_data_object( changed_listener_registry )
             curr_child[last_name] = value;
         }
         data_object.update( updates );
-
-        /*
-        let last_name = path.length > 0 ? path.pop() :null;
-
-        let parent = data;
-        let curr_path = [];
-        for( let name of path )
-        {
-            curr_path.push(name);
-            if( is_plain_object(parent) && name in parent )
-                parent = parent[name];
-            else
-            {
-                parent = {};
-                data_object.set_value(curr_path, parent);
-            }
-        }        
-        let old_value = last_name in parent ? parent[last_name] : null;
-
-        if( is_plain_object(value) && Object.keys(value).length > 0 )
-        {
-            for( const [child_name, child_value] of Object.entries(value) )             
-                data_object.set_value( [...path, ...( last_name == null ? [child_name] : [last_name, child_name] )], child_value );
-        }    
-        else 
-        {            
-            for( const validator of validators )             
-                if( validator( [ ...path, ...[last_name] ], value ) == false )
-                    return;
-
-            let notify = true;
-            if( value == null )
-            {
-                if( old_value != null )
-                    delete parent[last_name];                
-                else
-                    notify = false;
-            }
-            else
-                parent[last_name] = value;
-
-            if( notify )
-            {
-                changed_listener_registry.notify_changed_listeners ( [ ...path, ...[last_name] ], parent[last_name], old_value );   
-                // delete empty parents
-                if( Object.keys( parent ).length == 0 )
-                    data_object.remove( path );
-            }
-        }
-        */
     }  
     
     data_object.create = function( path, value )
