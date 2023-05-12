@@ -10,18 +10,30 @@
         var initialized_data_object;
 
         var app = create_default_app();
-        app.get_data_object().register_validator( function( path, value ) 
+        app.get_data_object().register_validator( function( updates ) 
         {
-            if( path.length >= 3 && path[0] == "teams" && path[2] == "name" )
+            if( "teams" in updates )
             {
-                if( (typeof(value) == "string" && value.length > 0) )
-                    app.get_data_object().remove(["errors", "invalid_name"]);
-                else
+                let teams = updates["teams"];
+                let keys = Object.keys( teams );
+                for( let key of keys )
                 {
-                    app.get_data_object().set_value( ["errors", "invalid_name"], true ); 
-                    app.get_data_object().remove( path.slice(0, -1) );
-                }             
+                    let team = teams[key];
+                    if( team == null )
+                        return true;
+                    let name = "name" in team ? team["name"] : null;
+
+                    if( (typeof(name) == "string" && name.length > 0) )
+                        app.get_data_object().remove(["errors", "invalid_name"]);
+                    else
+                    {
+                        app.get_data_object().set_value( ["errors", "invalid_name"], true ); 
+                        return false;
+                    }       
+
+                }      
             }
+            return true;
         });
         app.start();
 
@@ -33,25 +45,37 @@
         
         <h1>Soccer Team Manager</h1>
 
-        <form class="col col_gap" data-create-in="teams" data-name="name">
+        <form class="col col_gap" data-create-in="teams">
             <p class="b">Create a new team:</p>
             <input type="text" name="name" />
-            <div>
-                <span>Number of Championships:&nbsp;</span>
-                <input type="number" name="championships" />
-            </div>
+            <span>Image URL:&nbsp;</span>
+            <input type="text" name="image_url" value="" />
+            <span>Number of Championships:&nbsp;</span>
+            <input type="number" name="championships" value="0" />
             <p data-display-if="errors.invalid_name">Name must not be empty</p>
-            <input type="submit" class="button" value="Add Team" />
+            <div>
+                <input type="submit" class="button" value="Add Team" />
+                <!--
+                <input type="submit" class="button" value="Save" data-action="save_to_local_storage" />
+                <input type="submit" class="button" value="Load" data-action="load_from_local_storage" />
+                -->
+                <a href="#" data-action="save_to_file" data-path="teams" class="button">Save</a>
+                <a href="#" data-action="load_from_file" data-path="teams" class="button">Load</a>
+            </div>
+            
         </form>
 
-        <div data-children="teams" data-template-id="team-template" class="resp_row resp_row_gap two_items_on_tablet three_items_on_desktop four_items_on_full_hd">
+        <!--<div data-children="teams" data-template-id="team-template" class="resp_row resp_row_gap two_items_on_tablet three_items_on_desktop four_items_on_full_hd">-->
+        <div data-children="teams" data-template-id="team-template" class="flex_resp_row gap remove_outer_gap flex_one_on_mobile flex_two_on_tablet flex_three_on_desktop flex_four_on_full_hd">
 
         </div>
 
         <div id="team-template">            
-            <div class="card">
+            <div class="card card_fit_top">
+                <img src="" data-src="teams.image_url">
                 <p data-html="teams.name"></p>
                 <p>Number of Championships: <span data-html="teams.championships"></span></p>
+                <div><a href="#" data-action="remove" data-path="teams">Remove</a></div>
             </div>
         </div>
         
