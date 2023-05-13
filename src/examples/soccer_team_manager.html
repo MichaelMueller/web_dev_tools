@@ -38,7 +38,7 @@
 
 </head>
 
-    <body class="resp_row resp_row_gap medium_padding">
+    <body class="col medium_gap medium_padding">
         
         <h1>Soccer Team Manager</h1>
 
@@ -47,7 +47,8 @@
             <a href="#" data-action="load_from_file" data-path="teams" class="button">Load</a>
         </div>
 
-        <form class="resp_row resp_row_gap" data-create-in="teams" data-key-name="id">
+        <form class="col medium_gap" data-create-in="teams" data-key-name="id">
+
             <input type="hidden" name="id" data-value="team.id" />
 
             <p class="b">Create a new team:</p>
@@ -61,7 +62,7 @@
 
             <p data-display-if="errors.team.invalid_name">Name must not be empty</p>
             <p data-display-if="errors.team.invalid_image_url">Image URL must not be empty</p>
-            <div class="flex_resp_row gap remove_outer_gap">
+            <div class="row medium_gap">
                 <input type="submit" class="button" value="Add Team" data-display-if-not="team.id" />
                 <input type="submit" class="button" value="Change Team" data-display-if="team.id" />
                 <input type="button" class="button" value="Cancel Edit" data-display-if="team.id" data-action="remove" data-path="team" />
@@ -73,8 +74,8 @@
             
         </form>
 
-        <!--<div data-children="teams" data-template-id="team-template" class="resp_row resp_row_gap two_items_on_tablet three_items_on_desktop four_items_on_full_hd">-->
-        <div data-children="teams" data-template-id="team-template" class="flex_resp_row gap remove_outer_gap flex_one_on_mobile flex_two_on_tablet flex_three_on_desktop flex_four_on_full_hd">
+        <div data-children="teams" data-template-id="team-template" class="row wrap one_on_mobile two_on_tablet three_on_desktop four_on_full_hd">
+        <!--<div data-children="teams" data-template-id="team-template" class="flex_resp_row gap remove_outer_gap flex_one_on_mobile flex_two_on_tablet flex_three_on_desktop flex_four_on_full_hd">-->
 
         </div>
 
@@ -83,13 +84,16 @@
 
                 <img src="" data-src="teams...image_url">
 
-                <p data-html="teams...name"></p>
+                <div class="col medium_gap medium_padding">
+                    <p data-html="teams...name" class="b"></p>
 
-                <p>Number of Championships: <span data-html="teams...championships"></span></p>
+                    <p>Number of Championships: <span data-html="teams...championships"></span></p>
 
-                <div>
-                    <a href="#" data-action="copy" data-source="teams.." data-target="team">Edit</a>&nbsp;
-                    <a href="#" data-action="remove" data-path="teams..">Remove</a>
+                    <div>
+                        <a href="#" data-action="copy" data-source="teams.." data-target="team">Edit</a>
+                        &nbsp;
+                        <a href="#" data-action="remove" data-path="teams..">Remove</a>
+                    </div>
                 </div>
 
             </div>
