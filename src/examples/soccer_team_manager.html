@@ -22,15 +22,12 @@
                     if( team == null )
                         return true;
                     let name = "name" in team ? team["name"] : null;
+                    let image_url = "image_url" in team ? team["image_url"] : null;
 
-                    if( (typeof(name) == "string" && name.length > 0) )
-                        app.get_data_object().remove(["errors", "invalid_name"]);
-                    else
-                    {
-                        app.get_data_object().set_value( ["errors", "invalid_name"], true ); 
-                        return false;
-                    }       
-
+                    app.get_data_object().set_value( ["errors", "team", "invalid_name"], typeof(name) == "string" && name.length > 0 ? null : true ); 
+                    app.get_data_object().set_value( ["errors", "team", "invalid_image_url"], typeof(name) == "string" && name.length > 0 ? null : true ); 
+                    let error_keys = app.get_data_object().keys( ["errors", "team"] );
+                    return error_keys.length == 0;
                 }      
             }
             return true;
@@ -41,26 +38,37 @@
 
 </head>
 
-    <body class="col col_gap large_padding">
+    <body class="resp_row resp_row_gap medium_padding">
         
         <h1>Soccer Team Manager</h1>
 
-        <form class="col col_gap" data-create-in="teams">
+        <div>
+            <a href="#" data-action="save_to_file" data-path="teams" class="button">Save</a>
+            <a href="#" data-action="load_from_file" data-path="teams" class="button">Load</a>
+        </div>
+
+        <form class="resp_row resp_row_gap" data-create-in="teams" data-key-name="id">
+            <input type="hidden" name="id" data-value="team.id" />
+
             <p class="b">Create a new team:</p>
-            <input type="text" name="name" />
+            <input type="text" name="name" data-value="team.name" />
+
             <span>Image URL:&nbsp;</span>
-            <input type="text" name="image_url" value="" />
+            <input type="text" name="image_url" value="" data-value="team.image_url" />
+
             <span>Number of Championships:&nbsp;</span>
-            <input type="number" name="championships" value="0" />
-            <p data-display-if="errors.invalid_name">Name must not be empty</p>
-            <div>
-                <input type="submit" class="button" value="Add Team" />
+            <input type="number" name="championships" value="0" data-value="team.championships" />
+
+            <p data-display-if="errors.team.invalid_name">Name must not be empty</p>
+            <p data-display-if="errors.team.invalid_image_url">Image URL must not be empty</p>
+            <div class="flex_resp_row gap remove_outer_gap">
+                <input type="submit" class="button" value="Add Team" data-display-if-not="team.id" />
+                <input type="submit" class="button" value="Change Team" data-display-if="team.id" />
+                <input type="button" class="button" value="Cancel Edit" data-display-if="team.id" data-action="remove" data-path="team" />
                 <!--
                 <input type="submit" class="button" value="Save" data-action="save_to_local_storage" />
                 <input type="submit" class="button" value="Load" data-action="load_from_local_storage" />
                 -->
-                <a href="#" data-action="save_to_file" data-path="teams" class="button">Save</a>
-                <a href="#" data-action="load_from_file" data-path="teams" class="button">Load</a>
             </div>
             
         </form>
@@ -72,10 +80,18 @@
 
         <div id="team-template">            
             <div class="card card_fit_top">
-                <img src="" data-src="teams.image_url">
-                <p data-html="teams.name"></p>
-                <p>Number of Championships: <span data-html="teams.championships"></span></p>
-                <div><a href="#" data-action="remove" data-path="teams">Remove</a></div>
+
+                <img src="" data-src="teams...image_url">
+
+                <p data-html="teams...name"></p>
+
+                <p>Number of Championships: <span data-html="teams...championships"></span></p>
+
+                <div>
+                    <a href="#" data-action="copy" data-source="teams.." data-target="team">Edit</a>&nbsp;
+                    <a href="#" data-action="remove" data-path="teams..">Remove</a>
+                </div>
+
             </div>
         </div>
         

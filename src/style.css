@@ -161,17 +161,26 @@ img
     padding-bottom: var(--medium_space);
 }
 
-.flex_resp_row.gap > *
+.gap > *
 {
     margin-left: var(--medium_space);
     margin-top: var(--medium_space);
 }
 
-.flex_resp_row.remove_outer_gap
+.remove_top_gap
 {
-    margin-left: calc(var(--medium_space) * -1);
+    margin-top: calc(var(--medium_space) * -1) !important;
+}
+
+.remove_left_gap
+{
+    margin-left: calc(var(--medium_space) * -1) !important;
+}
+
+.remove_outer_gap
+{
     margin-top: calc(var(--medium_space) * -1);
-    padding: 0;
+    margin-left: calc(var(--medium_space) * -1);
 }
 
 .resp_row
@@ -356,6 +365,21 @@ a:hover
 
 @media screen and (min-width:768px) 
 {
+    :root 
+    {
+        --xxlarge_font: 28px;
+        --xlarge_font: 22px;
+        --large_font: 19px;
+        --medium_font: 16px;
+        --small_font: 14px;
+    
+        --xxlarge_space: 26px;
+        --xlarge_space: 20px;
+        --large_space: 17px;
+        --medium_space: 14px;
+        --small_space: 10px;
+    }
+
     .two_items_on_tablet > *
     {
         flex-basis: 50%;
@@ -405,6 +429,21 @@ a:hover
 
 @media screen and (min-width:1366px) 
 {
+    :root 
+    {
+        --xxlarge_font: 32px;
+        --xlarge_font: 26px;
+        --large_font: 23px;
+        --medium_font: 20px;
+        --small_font: 18px;
+    
+        --xxlarge_space: 28px;
+        --xlarge_space: 22px;
+        --large_space: 19px;
+        --medium_space: 16px;
+        --small_space: 12px;
+    }
+
     .three_items_on_desktop > *
     {
         flex-basis: 33.33333333%;
@@ -454,6 +493,20 @@ a:hover
 
 @media screen and (min-width:1920px) 
 {
+    :root 
+    {
+        --xxlarge_font: 36px;
+        --xlarge_font: 30px;
+        --large_font: 27px;
+        --medium_font: 24px;
+        --small_font: 22px;
+    
+        --xxlarge_space: 30px;
+        --xlarge_space: 24px;
+        --large_space: 21px;
+        --medium_space: 18px;
+        --small_space: 14px;
+    }
     
     .four_items_on_full_hd > *
     {
