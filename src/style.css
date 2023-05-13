@@ -226,8 +226,15 @@ a:hover
     flex-wrap: wrap;
 }
 
+.row.medium_gap
+{
+    margin-right: calc(-1 * var(--medium_space));
+    margin-bottom: calc(-1 * var(--medium_space));
+}
+
 .row.medium_gap > *
 {
+    margin-bottom: var(--medium_space);
     margin-right: var(--medium_space);
 }
 
@@ -282,6 +289,17 @@ a:hover
 {
     :root 
     {
+        --xxlarge_font: 26px;
+        --xlarge_font: 22px;
+        --large_font: 16px;
+        --medium_font: 14px;
+        --small_font: 102px;
+    
+        --xxlarge_space: 22px;
+        --xlarge_space: 16px;
+        --large_space: 12px;
+        --medium_space: 10px;
+        --small_space: 8px;
     }
 
     .row.two_on_tablet > *
@@ -291,7 +309,7 @@ a:hover
 
     .row.two_on_tablet.medium_gap > *
     {
-        flex-basis: calc( 50% - ( 1.0 * var(--medium_space) / 2.0 ) );
+        flex-basis: calc(50% - ( 2 * var(--medium_space) / 2.0 ) );
     }
 
 }
@@ -300,6 +318,17 @@ a:hover
 {
     :root 
     {
+        --xxlarge_font: 28px;
+        --xlarge_font: 24px;
+        --large_font: 18px;
+        --medium_font: 16px;
+        --small_font: 12px;
+    
+        --xxlarge_space: 24px;
+        --xlarge_space: 18px;
+        --large_space: 14px;
+        --medium_space: 12px;
+        --small_space: 10px;
     }
 
     .row.three_on_desktop > *
@@ -307,14 +336,9 @@ a:hover
         flex-basis: 33.33333333%;
     }
 
-    .flex_three_on_desktop.gap > *
+    .row.three_on_desktop.medium_gap > *
     {
-        flex-basis: calc( 33.33333333% - ( 4 * var(--medium_space) / 3.0 ) );
-    }
-    
-    .flex_three_on_desktop.gap.remove_outer_gap > *
-    {
-        flex-basis: calc( 33.33333333% - ( 3 * var(--medium_space) / 3.0 ) );
+        flex-basis: calc(33.33333333% - ( 3 * var(--medium_space) / 3.0 ) );
     }
 }
 
@@ -322,21 +346,27 @@ a:hover
 {
     :root 
     {
-    }
+        --xxlarge_font: 30px;
+        --xlarge_font: 26px;
+        --large_font: 20px;
+        --medium_font: 18px;
+        --small_font: 14px;
     
+        --xxlarge_space: 26px;
+        --xlarge_space: 20px;
+        --large_space: 16px;
+        --medium_space: 14px;
+        --small_space: 12px;
+    }
+
     .row.four_on_full_hd > *
     {
         flex-basis: 25%;
     }
 
-    .flex_four_on_full_hd.gap > *
+    .row.four_on_full_hd.medium_gap > *
     {
-        flex-basis: calc( 25% - ( 5 * var(--medium_space) / 4.0 ) );
-    }
-    
-    .flex_four_on_full_hd.gap.remove_outer_gap > *
-    {
-        flex-basis: calc( 25% - ( 4 * var(--medium_space) / 4.0 ) );
+        flex-basis: calc(25% - ( 4 * var(--medium_space) / 4.0 ) );
     }
 }
 
